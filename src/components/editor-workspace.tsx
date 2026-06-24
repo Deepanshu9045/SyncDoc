@@ -86,7 +86,7 @@ function EditorCanvas({
     editable: !readOnly,
     extensions: [
       StarterKit.configure({
-        history: false, // Yjs handles history
+        undoRedo: false, // Yjs handles history
       }),
       Collaboration.configure({
         document: ydoc,
