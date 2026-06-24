@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+import CollaborationCaret from "@tiptap/extension-collaboration-caret";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
@@ -92,7 +92,7 @@ function EditorCanvas({
         document: ydoc,
         field: "default",
       }),
-      CollaborationCursor.configure({
+      CollaborationCaret.configure({
         provider: provider,
         user: {
           name: userName,
