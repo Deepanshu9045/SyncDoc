@@ -1,0 +1,87 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model User {
+  id            String           @id @default(uuid())
+  name          String?
+  email         String           @unique
+  password      String?          // For Credentials auth
+  image         String?
+  createdAt     DateTime         @default(now())
+  
+  // Relations
+  ownedDocs     Document[]       @relation("DocumentOwner")
+  memberships   DocumentMember[]
+  versions      DocumentVersion[]
+}
+
+model Document {
+  id          String              @id @default(uuid())
+  title       String
+  ownerId     String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  owner       User                @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     DocumentMember[]
+  operations  DocumentOperation[]
+  versions    DocumentVersion[]
+}
+
+model DocumentMember {
+  id          String    @id @default(uuid())
+  documentId  String
+  userId      String
+  role        Role
+
+  // Relations
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, userId])
+}
+
+model DocumentOperation {
+  id            String    @id @default(uuid())
+  documentId    String
+  clientId      String    // Yjs Client ID
+  operationData Bytes     // Uint8Array binary Yjs update
+  vectorClock   Int       // Sequence index for ordering
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  document      Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentVersion {
+  id          String    @id @default(uuid())
+  documentId  String
+  snapshot    Bytes     // Serialized Yjs document state
+  createdBy   String    // User ID who created it
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  creator     User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+}
+
+model SyncQueue {
+  id          String    @id @default(uuid())
+  documentId  String
+  operation   Bytes     // Binary update
+  status      String    // PENDING, COMPLETED, FAILED
+  createdAt   DateTime  @default(now())
+}
