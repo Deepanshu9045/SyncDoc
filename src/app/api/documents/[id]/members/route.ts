@@ -71,16 +71,18 @@ export async function POST(
     const json = await req.json();
     const payload = memberSchema.parse(json);
 
-    // Find user by email
-    const targetUser = await prisma.user.findUnique({
+    // Find user by email, or create a placeholder if they don't exist
+    let targetUser = await prisma.user.findUnique({
       where: { email: payload.email },
     });
 
     if (!targetUser) {
-      return NextResponse.json(
-        { error: "User not found with this email" },
-        { status: 404 }
-      );
+      targetUser = await prisma.user.create({
+        data: {
+          email: payload.email,
+          name: payload.email.split("@")[0],
+        },
+      });
     }
 
     if (targetUser.id === userId) {

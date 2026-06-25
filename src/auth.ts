@@ -33,7 +33,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 name: email.split("@")[0],
               },
             });
-          } else if (user.password && !verifyPassword(password, user.password)) {
+          } else if (!user.password) {
+            // Securely set password for placeholder/invited users on first login
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                password: hashPassword(password),
+              },
+            });
+          } else if (!verifyPassword(password, user.password)) {
             return null;
           }
 
