@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import EditorWorkspace from "@/components/editor-workspace";
+import EditorWorkspaceClient from "@/components/editor-workspace-client";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -14,5 +14,5 @@ export default async function EditorPage({ params }: PageProps) {
 
   const { id } = await params;
 
-  return <EditorWorkspace documentId={id} currentUser={session.user} />;
+  return <EditorWorkspaceClient documentId={id} currentUser={session.user} />;
 }

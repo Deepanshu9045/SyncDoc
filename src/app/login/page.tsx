@@ -28,7 +28,26 @@ export default function LoginPage() {
         setError("Invalid email or password");
         setIsLoading(false);
       } else {
-        router.push("/dashboard");
+        const searchParams = new URLSearchParams(window.location.search);
+        const callbackUrl = searchParams.get("callbackUrl");
+        
+        let targetUrl = "/dashboard";
+        if (callbackUrl) {
+          try {
+            if (callbackUrl.startsWith("/")) {
+              targetUrl = callbackUrl;
+            } else {
+              const url = new URL(callbackUrl);
+              if (url.origin === window.location.origin) {
+                targetUrl = url.pathname + url.search + url.hash;
+              }
+            }
+          } catch (e) {
+            console.error("Invalid callbackUrl:", e);
+          }
+        }
+
+        router.push(targetUrl);
         router.refresh();
       }
     } catch (err) {
